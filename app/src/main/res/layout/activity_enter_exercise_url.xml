@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/linearlayout"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity"
+    android:orientation="vertical"
+    android:layout_gravity="center"
+    android:padding="20dp"
+    android:layout_marginBottom="20dp">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Aplikacija za mjerenje alternativnih rješenja"
+        android:textSize="25sp"
+        android:textAlignment="center"
+        android:padding="10dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tvoje ime"
+        android:padding="10dp"/>
+    <EditText
+        android:id="@+id/persons_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Upiši svoje ime"
+        android:padding="20dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Poveznica do zadataka"
+        android:padding="10dp"/>
+    <EditText
+        android:id="@+id/exercises_link"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="https://example.com/exercise.json"
+        android:padding="20dp"
+        android:text="http://kodba.eu/diplomski.txt"/>
+    <Button
+        android:id="@+id/get_exercises"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dohvati zadatke"
+        app:layout_constraintTop_toTopOf="parent"
+        android:padding="20dp"/>
+
+</LinearLayout>
