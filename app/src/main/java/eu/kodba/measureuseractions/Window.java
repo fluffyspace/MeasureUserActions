@@ -29,6 +29,7 @@ public class Window {
     private LayoutInflater layoutInflater;
 
     private Button button;
+    private TextView vrijeme;
 
     public Window(Context context, DialogInterface dialogInterface){
         this.context=context;
@@ -54,6 +55,7 @@ public class Window {
         // set onClickListener on the remove button, which removes
         // the view from the window
         button = mView.findViewById(R.id.window_close);
+        vrijeme = mView.findViewById(R.id.vrijeme);
         button.findViewById(R.id.window_close).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -70,6 +72,9 @@ public class Window {
 
     public void setButtonText(String text) {
         this.button.setText(text);
+    }
+    public void setVrijemeText(String text) {
+        this.vrijeme.setText(text);
     }
 
     public void open() {

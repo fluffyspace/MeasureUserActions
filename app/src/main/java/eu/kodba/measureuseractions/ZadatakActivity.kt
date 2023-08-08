@@ -34,17 +34,20 @@ import okhttp3.Response
 import java.io.IOException
 import java.lang.reflect.Type
 
-
+enum class UsingStandardOrAlternative{
+    NONE, STANDARD, ALTERNATIVE
+}
 class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
 
     private lateinit var binding: ActivityZadatakBinding
 
+    var name: String? = null
     var exercise: Exercise? = null
     var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
     private var actionsAdapter: ActionsAdapter? = null
     var selected_recycler_view_item = -1
-    var switched = false
+    var using_standard_or_alternative = UsingStandardOrAlternative.NONE
 
     override fun onBackPressed() {
         if(ForegroundService.getSharedInstance() == null){
@@ -66,6 +69,14 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
         finish()
     }
 
+    override fun onResume() {
+        super.onResume()
+        if(ForegroundService.getSharedInstance() != null) {
+            binding.serviceOnoff.text = "Prekini zadatak"
+            binding.serviceOnoff.isEnabled = true
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -74,21 +85,15 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
         val view = binding.root
         setContentView(view)
 
-        val gson = Gson()
-        val listType: Type = object : TypeToken<List<Exercise?>?>() {}.type
-        try {
-            val tmp = intent.extras?.getString("exercise")
-            exercise = gson.fromJson(tmp, Exercise::class.java)
-            val tmp2 = intent.extras?.getString("exercises")
-            exercises = gson.fromJson(tmp2, listType)
-            Log.d("ingo", exercises.toString())
-        }catch (e: JsonParseException){
-            Toast.makeText(this, "JsonParseException", Toast.LENGTH_SHORT).show()
-        } catch (e: JsonSyntaxException){
-            Toast.makeText(this, "JsonSyntaxException", Toast.LENGTH_SHORT).show()
-        }
+        binding.serviceOnoff.isEnabled = false
 
-        Log.d("ingo", "dobio sam $exercise")
+        name = intent.extras?.getString("name")
+        exercise = intent.extras?.getString("exercise")
+            ?.let { MainActivity.getExerciseFromJson(it) }
+        exercises = intent.extras?.getString("exercises")
+            ?.let { MainActivity.getExercisesFromJson(it) }
+
+        //Log.d("ingo", "dobio sam $exercise i $exercises")
         if(exercise == null){
             Toast.makeText(this, "Vježba nije dostupna.", Toast.LENGTH_SHORT).show()
             goToMainActivity()
@@ -106,13 +111,14 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
             Log.d("ingo", toggleButton.toString() + " " + checkedId + " " + isChecked)
             if(binding.button1.id == checkedId && isChecked){
                 Log.d("ingo", "prvi označen")
-                switched = false
+                using_standard_or_alternative = UsingStandardOrAlternative.STANDARD
             } else if(binding.button2.id == checkedId && isChecked){
                 Log.d("ingo", "drugi označen")
-                switched = true
+                using_standard_or_alternative = UsingStandardOrAlternative.ALTERNATIVE
             }
             //binding.instructionToOpenWhat.text = StringBuilder("3. Otvori " + (if(switched) "alternativnu" else "standardnu") + " aplikaciju.")
-            ForegroundService.getSharedInstance()?.switch = switched
+            ForegroundService.getSharedInstance()?.switch = using_standard_or_alternative == UsingStandardOrAlternative.STANDARD
+            binding.serviceOnoff.isEnabled = true
         }
 
         //binding.instructionToOpenWhat.text = StringBuilder("3. Otvori " + (if(switched) "alternativnu" else "standardnu") + " aplikaciju.")
@@ -149,11 +155,15 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
             // start the service based on the android version
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(Intent(this, ForegroundService::class.java)
+                    .putExtra("switch", using_standard_or_alternative == UsingStandardOrAlternative.ALTERNATIVE)
+                    .putExtra("name", name)
                     .putExtra("exercise", Gson().toJson(exercise))
                     .putExtra("exercises", Gson().toJson(exercises))
                 )
             } else {
                 startService(Intent(this, ForegroundService::class.java)
+                    .putExtra("switch", using_standard_or_alternative == UsingStandardOrAlternative.ALTERNATIVE)
+                    .putExtra("name", name)
                     .putExtra("exercise", Gson().toJson(exercise))
                     .putExtra("exercises", Gson().toJson(exercises))
                 )

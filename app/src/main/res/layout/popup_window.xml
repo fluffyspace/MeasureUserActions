@@ -5,12 +5,24 @@
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="4dp"
-    android:background="@null">
+    android:background="@null"
+    android:orientation="vertical">
 
     <Button
         android:id="@+id/window_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="CLICK" />
+    <TextView
+        android:id="@+id/vrijeme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        android:layout_below="@id/window_close"
+        android:clickable="false"
+        android:textColor="@color/white"
+        android:shadowColor="@color/black"
+        android:shadowRadius="2"
+        android:layout_alignRight="@id/window_close"/>
 
 </RelativeLayout>

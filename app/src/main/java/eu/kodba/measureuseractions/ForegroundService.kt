@@ -7,7 +7,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.*
-import android.media.AudioManager
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -16,20 +15,19 @@ import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ForegroundService: Service(), DialogInterface {
-    lateinit var mAudioManager: AudioManager
-    lateinit var mReceiverComponent: ComponentName
     var window: Window? = null
 
+    var name: String? = null
     val textBegin = "Započni"
     val textStop = "Završi"
     var azurirajNotifikaciju:Job? = null
@@ -66,13 +64,6 @@ class ForegroundService: Service(), DialogInterface {
         // create the custom or default notification
         // based on the android version
 
-
-
-        mAudioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager;
-        mReceiverComponent = ComponentName(this,MyBroadcastReceiver::class.java)
-
-        mAudioManager.registerMediaButtonEventReceiver(mReceiverComponent);
-
         // create an instance of Window class
         // and display the content on screen
         window = Window(this, this)
@@ -96,21 +87,24 @@ class ForegroundService: Service(), DialogInterface {
     override fun onStartCommand(intent: Intent?, flags2: Int, startId: Int): Int {
         serviceSharedInstance = this
 
+        switch = intent?.extras?.getBoolean("switch") ?: false
+        name = intent?.extras?.getString("name")
         val tmp = intent?.extras?.getString("exercise")
         val tmp2 = intent?.extras?.getString("exercises")
         exercises = tmp2?.let { MainActivity.getExercisesFromJson(it) }
         exercise = tmp?.let { MainActivity.getExerciseFromJson(it) }
 
-        Log.d("ingo", "servis je dobio $exercise")
-        Log.d("ingo", "servis je dobio $exercises")
+        //Log.d("ingo", "servis je dobio $exercise")
+        //Log.d("ingo", "servis je dobio $exercises")
+        Log.d("ingo", "servis je dobio za switch $switch")
 
-        intentForPending = Intent(this, ZadatakActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
 
+        intentForPending = packageManager.getLaunchIntentForPackage(this.packageName) ?: Intent(this, ZadatakActivity::class.java).apply {
+            //flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
         intentForPending.putExtra("exercise", Gson().toJson(exercise)).putExtra("exercises", Gson().toJson(exercises))
         pendingIntent = PendingIntent.getActivity(this, 0, intentForPending, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        Log.d("ingo", "putting $exercise to intent")
+        //Log.d("ingo", "putting $exercise to intent")
         notifyUser()
 
         return super.onStartCommand(intent, flags2, startId)
@@ -120,8 +114,6 @@ class ForegroundService: Service(), DialogInterface {
         super.onDestroy()
         azurirajNotifikaciju?.cancel()
         window?.close()
-        //unregisterReceiver(vReceiver);
-        mAudioManager.unregisterMediaButtonEventReceiver(mReceiverComponent)
         serviceSharedInstance = null
     }
 
@@ -138,12 +130,13 @@ class ForegroundService: Service(), DialogInterface {
         }
 
 
+
         val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
         val contentTitle = if(exerciseHappening) "Vrijeme prošlo: " + (System.currentTimeMillis() - exerciseStarted) + " ms" else "Vježba nije pokrenuta"
         return notificationBuilder.setOngoing(true)
             .setContentTitle("Vježba ${exercise?.name}")
             .setContentText(contentTitle) // this is important, otherwise the notification will show the way
-            .addAction(R.drawable.ic_delete, "Otvori zadatak", pendingIntent)
+            //.addAction(R.drawable.ic_delete, "Otvori zadatak", pendingIntent)
             .setContentIntent(pendingIntent)
             // you want i.e. it will show some default notification
             .setSmallIcon(R.drawable.ic_delete)
@@ -200,6 +193,9 @@ class ForegroundService: Service(), DialogInterface {
                 while(true) {
                     try {
                         notifyUser()
+                        withContext(Dispatchers.Main){
+                            window!!.setVrijemeText(((System.currentTimeMillis() - exerciseStarted)/1000).toString() + " s")
+                        }
                         Log.d("ingo", "tried updating")
                     } catch (e: Exception) {
                         Log.e("ingo", "greska sendStatistics")
@@ -225,7 +221,7 @@ class ForegroundService: Service(), DialogInterface {
             Log.d("ingo", "Exercise ended")
             window!!.setButtonText(textBegin)
             obavijesti("Zadatak zabilježen.")
-            startActivity(intentForPending)
+            //startActivity(intentForPending)
         }
         exerciseHappening = !exerciseHappening
     }

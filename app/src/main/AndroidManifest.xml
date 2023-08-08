@@ -26,17 +26,31 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="Početna">
-        </activity>
-        <activity
-            android:name=".EnterExerciseUrlActivity"
-            android:exported="true"
-            android:noHistory="true"
             android:label="MeasureUserActions">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name="eu.kodba.measureuseractions.EnterExerciseUrlActivity"
+            android:exported="true"
+            android:noHistory="true"
+            android:label="Unos podataka">
+            <intent-filter android:label="Enter exercise url and persons name" android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+
+                <!-- on below line we are adding a default category to our intent -->
+                <category android:name="android.intent.category.DEFAULT" />
+
+                <!-- on below line we are adding a category to make our app browsable -->
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:host="www.kodba.eu"/>
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+
+
             </intent-filter>
         </activity>
         <activity

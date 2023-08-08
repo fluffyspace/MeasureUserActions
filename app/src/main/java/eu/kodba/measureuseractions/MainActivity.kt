@@ -42,10 +42,13 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
     private lateinit var binding: ActivityMainBinding
 
     var exercise: Exercise? = null
-    var exercises: MutableList<Exercise> = mutableListOf()
+    var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
     private var actionsAdapter: ActionsAdapter? = null
     var selected_recycler_view_item = -1
+
+    var url: String? = null
+    var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,7 +58,45 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
         val view = binding.root
         setContentView(view)
 
+        binding.openExercises.isEnabled = false
+        binding.exercisesStatus.text = "Zadaci se učitavaju..."
+
+
+
         checkOverlayPermission();
+        Log.d("ingo", "extras ${intent.extras}")
+
+        val urlByIntent = intent.extras?.getString("url")
+        Log.d("ingo", "urlByIntent $urlByIntent")
+        if(urlByIntent != null){
+            changeSettings("url", urlByIntent)
+        }
+        val nameByIntent = intent.extras?.getString("name")
+        Log.d("ingo", "nameByIntent $nameByIntent")
+        if(nameByIntent != null){
+            changeSettings("name", nameByIntent)
+        }
+        if(nameByIntent == null || urlByIntent == null){
+            url = getPreferences(MODE_PRIVATE).getString("url", urlByIntent ?: "")
+            name = getPreferences(MODE_PRIVATE).getString("name", nameByIntent ?: "")
+            Log.d("ingo", "saved = $url, $name")
+            if(url == "" || name == ""){
+                // pokreni EnterExerciseUrlActivity da pitaš korisnika za unos, dodaj url i name kao extras u slučaju da je nešto od toga ispunjeno
+                val intent = Intent(this, EnterExerciseUrlActivity::class.java)
+                intent.putExtra("url", url)
+                intent.putExtra("name", name)
+                if (intent.resolveActivity(packageManager) != null) {
+                    startActivity(intent)
+                }
+                finish()
+                return
+            }
+        } else {
+            url = urlByIntent
+            name = nameByIntent
+        }
+        binding.personsName.text = "Bok, $name."
+        if(url != null) fetchExercises(url!!)
 
         val zadaci_json = intent.extras?.getString("exercises")
         if(zadaci_json != null) {
@@ -102,6 +143,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
     fun startZadaciActivity(){
         val intent = Intent(this, ZadataciActivity::class.java)
         intent.putExtra("exercises", Gson().toJson(exercises))
+        intent.putExtra("name", name)
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         }
@@ -165,14 +207,16 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
             val messageDao: ActionsDao = db.actionsDao()
             lifecycleScope.launch(Dispatchers.Default) {
                 try {
-                    val akcije = messageDao.getAll()
+                    var akcije = messageDao.getAll()
+                    akcije = akcije.sortedByDescending { it.id }
+                    Log.d("ingo", "akcije $akcije")
                     withContext(Dispatchers.Main){
                         if(akcije.isEmpty()){
                             binding.odradeneVjezbeHint.text = "Još nema rješenih vježbi."
+                            binding.sendStatistics.visibility = View.GONE
                         }
                         actions = akcije.toMutableList()
                         (binding.recyclerView.adapter as ActionsAdapter).actionsList = akcije
-                        (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
                         (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
                     }
                 } catch (e: Exception) {
@@ -213,6 +257,60 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                 Log.e("ingo", "greska onDialogPositiveClick")
             }
         }
+    }
+
+    private fun changeSettings(key: String, value: Any){
+        Log.d("ingo", "should write $key as $value")
+        val sharedPreferences: SharedPreferences = getPreferences(MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        if(value::class == Boolean::class) {
+            editor.putBoolean(key, value as Boolean)
+        } else if(value::class == Float::class) {
+            editor.putFloat(key, value as Float)
+        } else if(value::class == String::class) {
+            editor.putString(key, value as String)
+        } else if(value::class == Int::class) {
+            editor.putInt(key, value as Int)
+        } else if(value::class == Long::class) {
+            editor.putLong(key, value as Long)
+        }
+        editor.apply()
+    }
+
+    fun fetchExercises(url: String){
+        val client = OkHttpClient()
+        val request: Request = Request.Builder()
+            .get()
+            .url(url)
+            .build()
+
+        val test = client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                // Handle this
+                Log.e("ingo","Try again later!!! $e")
+                //binding.getExercises.isEnabled = true
+                Handler(Looper.getMainLooper()).post(Runnable {
+                    binding.exercisesStatus.text = "Greška učitavanja zadataka."
+                })
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val bodystring = response.body()?.string()
+                if(bodystring != null) {
+                    exercises = getExercisesFromJson(bodystring)
+                }
+                bodystring?.let {
+                    Log.e("ingo", it)
+                }
+                Log.e("ingo", exercises.toString())
+                Handler(Looper.getMainLooper()).post(Runnable {
+                    (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
+                    (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
+                    binding.openExercises.isEnabled = true
+                    binding.exercisesStatus.text = "Zadaci učitani."
+                })
+            }
+        })
     }
 
 }

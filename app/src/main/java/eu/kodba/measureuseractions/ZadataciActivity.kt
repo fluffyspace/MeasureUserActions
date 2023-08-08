@@ -40,8 +40,9 @@ class ZadataciActivity : AppCompatActivity(), OnExerciseClick {
 
     private lateinit var binding: ActivityZadaciBinding
 
+    var name: String = ""
     var exercise: Exercise? = null
-    var exercises: MutableList<Exercise> = mutableListOf()
+    var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
     private var exercisesAdapter: ExercisesAdapter? = null
     var selected_recycler_view_item = -1
@@ -54,23 +55,14 @@ class ZadataciActivity : AppCompatActivity(), OnExerciseClick {
         val view = binding.root
         setContentView(view)
 
+        name = intent.extras?.getString("name").toString()
         val zadaci_json = intent.extras?.getString("exercises")
         if(zadaci_json != null) {
-            val gson = Gson()
-            val listType: Type = object : TypeToken<List<Exercise?>?>() {}.type
-            try {
-                exercises =
-                    gson.fromJson(zadaci_json, listType)
-
+            exercises = MainActivity.getExercisesFromJson(zadaci_json)
+            if(exercises != null){
                 exercisesAdapter = ExercisesAdapter(this, this)
-                exercisesAdapter?.exercisesList = exercises
+                exercisesAdapter?.exercisesList = exercises as MutableList<Exercise>
                 binding.recyclerView.adapter = exercisesAdapter
-                //binding.recyclerView.adapter?.notifyDataSetChanged()
-                Log.d("ingo", exercises.toString())
-            }catch (e: JsonParseException){
-                Toast.makeText(this, "JsonParseException", Toast.LENGTH_SHORT).show()
-            } catch (e: JsonSyntaxException){
-                Toast.makeText(this, "JsonSyntaxException", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -91,7 +83,8 @@ class ZadataciActivity : AppCompatActivity(), OnExerciseClick {
         val intent = Intent(this, ZadatakActivity::class.java)
         intent.putExtra("exercise", Gson().toJson(exercise))
         intent.putExtra("exercises", Gson().toJson(exercises))
-        Log.d("ingo", "predao sam ${intent.extras?.getString("exercise")}")
+        intent.putExtra("name", name)
+        //Log.d("ingo", "predao sam ${intent.extras?.getString("exercise")}")
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         }

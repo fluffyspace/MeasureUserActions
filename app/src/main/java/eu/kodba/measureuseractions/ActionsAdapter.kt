@@ -17,7 +17,7 @@ interface OnActionClick{
 
 class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Adapter<ActionsAdapter.ViewHolder>() {
     var actionsList: List<Actions> = listOf()
-    var exercisesList: List<Exercise> = listOf()
+    var exercisesList: List<Exercise>? = listOf()
     var context:Context
     var onActionClick:OnActionClick
     var idOtvorenogMenija:Int = -1
@@ -62,11 +62,11 @@ class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Ad
     override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
         //Here we use the information in the list we created to define the views
         //val appIcon:Drawable? = icons.get(appsList[i].packageName)
-        val exercise = exercisesList.find{it.id == actionsList[i].exercise}
+        val exercise = exercisesList?.find{it.id == actionsList[i].exercise}
         val exerciseName = exercise?.name ?: "Zadatak ne postoji"
-        Log.d("ingo", "broj zadataka " + exercisesList.size)
-        viewHolder.action_title.text = StringBuilder("${i+1}. " + exerciseName)
-        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + (if(actionsList[i].standardOrAlternative) "std." else "alt.") + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)")
+        Log.d("ingo", "broj zadataka " + exercisesList?.size)
+        viewHolder.action_title.text = StringBuilder(exerciseName)
+        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + (if(actionsList[i].standardOrAlternative) "alt." else "std.") + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)")
 
     }
 
@@ -83,7 +83,7 @@ class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Ad
 
         //This is what adds the code we've written in here to our target view
         val inflater = LayoutInflater.from(parent.context)
-        val view: View = inflater.inflate(R.layout.cardview_action_row, parent, false)
+        val view: View = inflater.inflate(R.layout.history_row, parent, false)
         return ViewHolder(view)
     }
 

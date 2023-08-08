@@ -22,7 +22,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Tvoje ime"
-        android:padding="10dp"/>
+        android:paddingHorizontal="10dp"/>
     <EditText
         android:id="@+id/persons_name"
         android:layout_width="match_parent"
@@ -33,19 +33,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Poveznica do zadataka"
-        android:padding="10dp"/>
+        android:paddingHorizontal="10dp"
+        android:layout_marginTop="20dp"/>
     <EditText
         android:id="@+id/exercises_link"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="https://example.com/exercise.json"
         android:padding="20dp"
-        android:text="http://kodba.eu/diplomski.txt"/>
+        android:text="https://pastebin.com/raw/w8C31JNq"/>
     <Button
         android:id="@+id/get_exercises"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Dohvati zadatke"
+        android:text="Dalje"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp"/>
 
