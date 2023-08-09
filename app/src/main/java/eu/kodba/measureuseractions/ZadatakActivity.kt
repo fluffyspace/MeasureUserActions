@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -96,10 +97,14 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
 
         getSolvedExercises()
 
-        supportActionBar?.title = exercise!!.name;
+        if(exercise!!.apps.isEmpty()){
+            binding.aplikacijaContainer.visibility = View.GONE
+        }
+
+        supportActionBar?.title = "Zadatak ${exercise!!.id}"
 
         binding.upute.text = exercise!!.instructions
-        binding.zadatak.text = "Zadatak: ${exercise!!.name}"
+        binding.zadatak.text = "${exercise!!.name}"
         val encodedHtml = Base64.encodeToString(exercise!!.instructions.toByteArray(), Base64.NO_PADDING)
 
         binding.webview.loadData(encodedHtml, "text/html", "base64")
@@ -110,7 +115,7 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
 
         binding.serviceOnoff.setOnClickListener {
             if(ForegroundService.getSharedInstance() == null){
-                if(binding.appsMenu.text == null || binding.appsMenu.text.toString() == ""){
+                if(exercise!!.apps.isNotEmpty() && (binding.appsMenu.text == null || binding.appsMenu.text.toString() == "")){
                     Toast.makeText(this, "Odaberi aplikaciju", Toast.LENGTH_SHORT).show()
                 } else {
                     startService()

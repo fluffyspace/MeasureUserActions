@@ -1,12 +1,14 @@
 package eu.kodba.measureuseractions
 
-import android.R
+import eu.kodba.measureuseractions.R
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.*
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Build
 import android.os.Handler
 import android.os.IBinder
@@ -22,6 +24,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+
 
 
 class ForegroundService: Service(), DialogInterface {
@@ -50,6 +53,10 @@ class ForegroundService: Service(), DialogInterface {
 
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
+    lateinit var soundPool: SoundPool
+    var start = 0
+    var finish = 1
+
     // Create an explicit intent for an Activity in your app
     lateinit var intentForPending: Intent
 
@@ -75,6 +82,32 @@ class ForegroundService: Service(), DialogInterface {
             }
         }
         registerReceiver(vReceiver, IntentFilter("android.bluetooth.headset.action.VENDOR_SPECIFIC_HEADSET_EVENT"))*/
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(
+                AudioAttributes.USAGE_ASSISTANCE_SONIFICATION
+            )
+            .setContentType(
+                AudioAttributes.CONTENT_TYPE_SONIFICATION
+            )
+            .build()
+
+        soundPool = SoundPool.Builder()
+                            .setMaxStreams(3)
+                            .setAudioAttributes(
+                                audioAttributes
+                            )
+                            .build()
+        start = soundPool
+            .load(
+                this,
+                R.raw.start,
+                1
+            )
+        finish = soundPool.load(
+            this,
+            R.raw.finish,
+            1
+        )
     }
 
     companion object{
@@ -97,7 +130,6 @@ class ForegroundService: Service(), DialogInterface {
         Log.d("ingo", "servis je dobio $exercise")
         Log.d("ingo", "servis je dobio $exercises")
         Log.d("ingo", "servis je dobio za aplikaciju $app")
-
 
         intentForPending = packageManager.getLaunchIntentForPackage(this.packageName) ?: Intent(this, ZadatakActivity::class.java).apply {
             //flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -129,8 +161,6 @@ class ForegroundService: Service(), DialogInterface {
             manager.createNotificationChannel(chan)
         }
 
-
-
         val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
         val contentTitle = if(exerciseHappening) "Vrijeme prošlo: " + (System.currentTimeMillis() - exerciseStarted) + " ms" else "Vježba nije pokrenuta"
         return notificationBuilder.setOngoing(true)
@@ -139,7 +169,7 @@ class ForegroundService: Service(), DialogInterface {
             //.addAction(R.drawable.ic_delete, "Otvori zadatak", pendingIntent)
             .setContentIntent(pendingIntent)
             // you want i.e. it will show some default notification
-            .setSmallIcon(R.drawable.ic_delete)
+            .setSmallIcon(R.drawable.baseline_timer_24)
             .setPriority(NotificationManager.IMPORTANCE_MIN)
             .setCategory(Notification.CATEGORY_SERVICE)
             .setOnlyAlertOnce(true)
@@ -185,6 +215,10 @@ class ForegroundService: Service(), DialogInterface {
         }
         MainActivity.getSharedInstance()?.buttonClicked()
         if(!exerciseHappening){
+
+            soundPool.play(
+                start, 1f, 1f, 0, 0, 1f);
+
             exerciseStarted = System.currentTimeMillis()
             window!!.setButtonText(textStop)
             Log.d("ingo", "Exercise started")
@@ -204,6 +238,9 @@ class ForegroundService: Service(), DialogInterface {
                 }
             }
         } else {
+            soundPool.play(
+                finish, 1f, 1f, 0, 0, 1f);
+
             azurirajNotifikaciju?.cancel()
             exerciseEnded = System.currentTimeMillis()
             val db = AppDatabase.getInstance(this)
@@ -213,7 +250,7 @@ class ForegroundService: Service(), DialogInterface {
                 // New coroutine that can call suspend functions
                 try {
                     val akcija = Actions(exercise = exercise!!.id, timeTook = exerciseEnded-exerciseStarted, timestamp = exerciseEnded, application = app ?: "ne radi")
-                    val akcije = messageDao.insertAll(akcija)
+                    messageDao.insertAll(akcija)
                 } catch (e: Exception) {
                     Log.e("ingo", "greska sendStatistics")
                 }

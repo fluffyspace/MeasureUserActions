@@ -18,8 +18,7 @@
         android:text="Zadatak: "
         android:layout_marginTop="10dp"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:visibility="gone"/>
+        android:textStyle="bold"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -39,16 +38,6 @@
         android:padding="10dp"
         android:textSize="20sp"
         android:visibility="gone"/>
-
-
-    <!--<TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Procedura rješavanja zadatka: (pročitaj sve korake prije početka)"
-        android:lineSpacingExtra="5dp"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"/>-->
-
     <TextView
         android:id="@+id/rjesenost_zadatka"
         android:layout_width="match_parent"
@@ -56,29 +45,31 @@
         tools:text="Zadatak riješen []"
         android:text="not set"
         android:layout_marginTop="20dp"/>
-
-    <TextView
+    <LinearLayout
+        android:id="@+id/aplikacija_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aplikacija s kojom ćeš rješavati:"
-        android:layout_marginTop="20dp"/>
-    <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Aplikacija"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="20dp">
-
-        <AutoCompleteTextView
-            android:id="@+id/apps_menu"
+        android:orientation="vertical">
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:inputType="none"
-            />
-
-    </com.google.android.material.textfield.TextInputLayout>
-
+            android:text="Aplikacija s kojom ćeš rješavati:"
+            android:layout_marginTop="20dp"/>
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Aplikacija"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="20dp">
+            <AutoCompleteTextView
+                android:id="@+id/apps_menu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="none"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
     <Button
         android:id="@+id/service_onoff"
         android:layout_width="match_parent"
@@ -86,52 +77,5 @@
         android:text="Započni zadatak"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp"/>
-    <!--<TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="2. Izađi iz ove aplikacije pritiskom na srednju tipku dolje"
-        android:lineSpacingExtra="5dp"
-        android:textSize="20sp"
-        android:layout_marginTop="20dp"/>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/home_button_arrow"/>
-    <TextView
-        android:id="@+id/instructionToOpenWhat"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text=""
-        android:lineSpacingExtra="5dp"
-        android:textSize="20sp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="4. Kad si spreman/a započni mjerač vremena (klikom na tipku ZAPOČNI gore desno)."
-        android:lineSpacingExtra="5dp"
-        android:textSize="20sp"/>
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:src="@drawable/zapocni"
-        android:layout_gravity="center"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="5. Odradi postupak\n6. Kad završiš sa zadatkom zaustavi mjerač vremena (klikom na tipku ZAVRŠI gore desno)."
-        android:lineSpacingExtra="5dp"
-        android:textSize="20sp"/>
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="80dp"
-        android:src="@drawable/zavrsi"
-        android:layout_gravity="center"/>-->
-    <!--<Button
-        android:id="@+id/service_onoff"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Zatvori zadatak"
-        app:layout_constraintTop_toTopOf="parent"
-        android:padding="20dp"/>-->
 </LinearLayout>
 </ScrollView>

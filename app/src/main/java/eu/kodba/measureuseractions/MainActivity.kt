@@ -106,12 +106,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
-            R.id.reload -> {
-                //startActivity(Intent(this, About::class.java))
-                true
-            }
             R.id.delete_restart -> {
-                //startActivity(Intent(this, Help::class.java))
                 val db = AppDatabase.getInstance(this)
                 val actionsDao: ActionsDao = db.actionsDao()
                 val exerciseDao: ExerciseDao = db.exerciseDao()
@@ -263,9 +258,9 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
         val messageDao: ActionsDao = db.actionsDao()
         lifecycleScope.launch(Dispatchers.Default) {
             try {
-                val akcije = messageDao.delete(action)
+                messageDao.delete(action)
             } catch (e: Exception) {
-                Log.e("ingo", "greska onDialogPositiveClick")
+                Log.e("ingo", "greska onDialogPositiveClick $e")
             }
         }
     }
