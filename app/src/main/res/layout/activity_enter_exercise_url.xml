@@ -21,17 +21,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tvoje ime"
-        android:paddingHorizontal="10dp"/>
-    <EditText
-        android:id="@+id/persons_name"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Upiši svoje ime"
-        android:padding="20dp"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Poveznica do zadataka"
         android:paddingHorizontal="10dp"
         android:layout_marginTop="20dp"/>

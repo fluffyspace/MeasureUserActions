@@ -1,42 +1,22 @@
 package eu.kodba.measureuseractions
 
-import android.app.Notification.Action
 import android.content.Intent
-import android.content.SharedPreferences
-import android.graphics.Canvas
-import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
-import android.view.View
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.google.gson.JsonParseException
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
-import eu.kodba.measureuseractions.databinding.ActivityMainBinding
 import eu.kodba.measureuseractions.databinding.ActivityZadatakBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
-import java.lang.reflect.Type
 
-enum class UsingStandardOrAlternative{
-    NONE, STANDARD, ALTERNATIVE
-}
 class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
 
     private lateinit var binding: ActivityZadatakBinding
@@ -45,15 +25,29 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
     var exercise: Exercise? = null
     var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
-    private var actionsAdapter: ActionsAdapter? = null
-    var selected_recycler_view_item = -1
-    var using_standard_or_alternative = UsingStandardOrAlternative.NONE
 
     override fun onBackPressed() {
         if(ForegroundService.getSharedInstance() == null){
             super.onBackPressed()
         } else {
             this.moveTaskToBack(true)
+        }
+    }
+
+    fun getSolvedExercises(){
+        val db = AppDatabase.getInstance(this)
+        val messageDao: ActionsDao = db.actionsDao()
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                val akcije = messageDao.getAll().filter{it.exercise == exercise!!.id }
+                val rjesenosti = "Rješenosti zadatka: " + exercise!!.apps.map{app -> "$app: " + akcije.filter { it.application == app }.size + "/${exercise!!.repetitions}"}
+
+                withContext(Dispatchers.Main){
+                    binding.rjesenostZadatka.text = rjesenosti.toString()
+                }
+            } catch (e: Exception) {
+                Log.e("ingo", "greska getSolvedExercises ${e.toString()}")
+            }
         }
     }
 
@@ -73,19 +67,18 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
         super.onResume()
         if(ForegroundService.getSharedInstance() != null) {
             binding.serviceOnoff.text = "Prekini zadatak"
-            binding.serviceOnoff.isEnabled = true
         }
+        getSolvedExercises()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityZadatakBinding.inflate(layoutInflater)
-
         val view = binding.root
         setContentView(view)
 
-        binding.serviceOnoff.isEnabled = false
+
 
         name = intent.extras?.getString("name")
         exercise = intent.extras?.getString("exercise")
@@ -100,39 +93,33 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
             finish()
             return
         }
+
+        getSolvedExercises()
+
+        supportActionBar?.title = exercise!!.name;
+
         binding.upute.text = exercise!!.instructions
         binding.zadatak.text = "Zadatak: ${exercise!!.name}"
         val encodedHtml = Base64.encodeToString(exercise!!.instructions.toByteArray(), Base64.NO_PADDING)
 
         binding.webview.loadData(encodedHtml, "text/html", "base64")
 
-        binding.toggleButton.addOnButtonCheckedListener { toggleButton, checkedId, isChecked ->
-            // Respond to button selection
-            Log.d("ingo", toggleButton.toString() + " " + checkedId + " " + isChecked)
-            if(binding.button1.id == checkedId && isChecked){
-                Log.d("ingo", "prvi označen")
-                using_standard_or_alternative = UsingStandardOrAlternative.STANDARD
-            } else if(binding.button2.id == checkedId && isChecked){
-                Log.d("ingo", "drugi označen")
-                using_standard_or_alternative = UsingStandardOrAlternative.ALTERNATIVE
-            }
-            //binding.instructionToOpenWhat.text = StringBuilder("3. Otvori " + (if(switched) "alternativnu" else "standardnu") + " aplikaciju.")
-            ForegroundService.getSharedInstance()?.switch = using_standard_or_alternative == UsingStandardOrAlternative.STANDARD
-            binding.serviceOnoff.isEnabled = true
-        }
+        val items = exercise!!.apps
+        val adapter = ArrayAdapter(this, R.layout.list_item, items)
+        binding.appsMenu.setAdapter(adapter)
 
-        //binding.instructionToOpenWhat.text = StringBuilder("3. Otvori " + (if(switched) "alternativnu" else "standardnu") + " aplikaciju.")
         binding.serviceOnoff.setOnClickListener {
             if(ForegroundService.getSharedInstance() == null){
-                startService()
-                binding.serviceOnoff.text = "Prekini zadatak"
+                if(binding.appsMenu.text == null || binding.appsMenu.text.toString() == ""){
+                    Toast.makeText(this, "Odaberi aplikaciju", Toast.LENGTH_SHORT).show()
+                } else {
+                    startService()
+                    binding.serviceOnoff.text = "Prekini zadatak"
+                }
             } else {
                 ForegroundService.getSharedInstance()?.stopSelf()
                 binding.serviceOnoff.text = "Započni zadatak"
             }
-            /*val newFragment = DeleteDialog("Stvarno želiš prekinuti vježbu?")
-            newFragment.show(supportFragmentManager, "exitAction")*/
-
         }
 
     }
@@ -144,25 +131,22 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
         }
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
     fun startService() {
+        Log.d("ingo", "application ${binding.appsMenu.text}")
         // check if the user has already granted
         // the Draw over other apps permission
         if (Settings.canDrawOverlays(this)) {
             // start the service based on the android version
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(Intent(this, ForegroundService::class.java)
-                    .putExtra("switch", using_standard_or_alternative == UsingStandardOrAlternative.ALTERNATIVE)
+                    .putExtra("app", binding.appsMenu.text.toString())
                     .putExtra("name", name)
                     .putExtra("exercise", Gson().toJson(exercise))
                     .putExtra("exercises", Gson().toJson(exercises))
                 )
             } else {
                 startService(Intent(this, ForegroundService::class.java)
-                    .putExtra("switch", using_standard_or_alternative == UsingStandardOrAlternative.ALTERNATIVE)
+                    .putExtra("app", binding.appsMenu.text.toString())
                     .putExtra("name", name)
                     .putExtra("exercise", Gson().toJson(exercise))
                     .putExtra("exercises", Gson().toJson(exercises))

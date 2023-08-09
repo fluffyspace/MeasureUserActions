@@ -10,23 +10,25 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:orientation="vertical"
-    android:padding="20dp">
+    android:padding="10dp">
     <TextView
         android:id="@+id/zadatak"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Zadatak: "
-        android:padding="10dp"
+        android:layout_marginTop="10dp"
         android:textSize="20sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:visibility="gone"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Upute"
-        android:padding="10dp"
+        android:layout_marginTop="10dp"
         android:textSize="20sp"/>
     <WebView
         android:id="@+id/webview"
+        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <TextView
@@ -48,36 +50,35 @@
         android:layout_marginTop="20dp"/>-->
 
     <TextView
+        android:id="@+id/rjesenost_zadatka"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aplikacija koju koristim:"
-        android:padding="10dp"
-        android:textSize="20sp"/>
-    <com.google.android.material.button.MaterialButtonToggleGroup
-        android:id="@+id/toggleButton"
+        tools:text="Zadatak riješen []"
+        android:text="not set"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:singleSelection="true"
-        app:selectionRequired="true">
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="0dp"
-            android:layout_weight="1"
+        android:text="Aplikacija s kojom ćeš rješavati:"
+        android:layout_marginTop="20dp"/>
+    <com.google.android.material.textfield.TextInputLayout
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Aplikacija"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="20dp">
+
+        <AutoCompleteTextView
+            android:id="@+id/apps_menu"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Standardna"
-            style="?attr/materialButtonOutlinedStyle"
-            android:padding="15dp"
+            android:inputType="none"
             />
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Alternativna"
-            style="?attr/materialButtonOutlinedStyle"
-            android:padding="15dp"
-            />
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+
+    </com.google.android.material.textfield.TextInputLayout>
+
     <Button
         android:id="@+id/service_onoff"
         android:layout_width="match_parent"

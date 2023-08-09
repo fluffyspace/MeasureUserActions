@@ -15,6 +15,8 @@ import com.google.gson.JsonParseException
 import com.google.gson.JsonSyntaxException
 import com.google.gson.reflect.TypeToken
 import eu.kodba.measureuseractions.databinding.ActivityEnterExerciseUrlBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
@@ -29,10 +31,8 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
     private lateinit var binding: ActivityEnterExerciseUrlBinding
 
     var exercise: Exercise? = null
-    var exercises: MutableList<Exercise> = mutableListOf()
+    var exercises: MutableList<Exercise>? = null
     var actions: MutableList<Actions> = mutableListOf()
-    private var actionsAdapter: ActionsAdapter? = null
-    var selected_recycler_view_item = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,24 +49,17 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
         if(data2?.pathSegments != null && data2.pathSegments?.size!! > 0){
             binding.exercisesLink.setText(data2.pathSegments!![0].toString())
         }
-        if(data2?.pathSegments != null && data2.pathSegments?.size!! == 2){
-            binding.personsName.setText(data2.pathSegments!![1].toString())
-        }
 
         val urlByIntent = intent.extras?.getString("url")
         if(urlByIntent != null && urlByIntent != ""){
             binding.exercisesLink.setText(urlByIntent)
         }
-        val nameByIntent = intent.extras?.getString("name")
-        if(nameByIntent != null && nameByIntent != ""){
-            binding.personsName.setText(nameByIntent)
-        }
 
         binding.getExercises.setOnClickListener {
-            if(binding.exercisesLink.text.toString() != "" && binding.personsName.text.toString() != "") {
-                startMainActivity()
+            if(binding.exercisesLink.text.toString() != "") {
+                fetchExercises(binding.exercisesLink.text.toString())
             } else {
-                Log.d("ingo", "not fetching " + binding.exercisesLink.text.toString() + "+" + binding.personsName.text.toString())
+                Log.d("ingo", "not fetching " + binding.exercisesLink.text.toString())
                 Toast.makeText(this, "Nisu popunjena sva polja.", Toast.LENGTH_LONG).show()
             }
         }
@@ -74,9 +67,8 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
 
     fun startMainActivity(){
         val intent = Intent(this, MainActivity::class.java)
-        Log.d("ingo", "putting extra ${binding.exercisesLink.text} ${binding.personsName.text}")
+        Log.d("ingo", "putting extra ${binding.exercisesLink.text}")
         intent.putExtra("url", binding.exercisesLink.text.toString())
-        intent.putExtra("name", binding.personsName.text.toString())
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         }
@@ -92,6 +84,46 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
             finish()
             return
         }
+    }
+
+    fun fetchExercises(url: String){
+        val client = OkHttpClient()
+        val request: Request = Request.Builder()
+            .get()
+            .url(url)
+            .build()
+
+        val test = client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                // Handle this
+                Log.e("ingo","Try again later!!! $e")
+                //binding.getExercises.isEnabled = true
+                Handler(Looper.getMainLooper()).post(Runnable {
+                    Toast.makeText(this@EnterExerciseUrlActivity, "Greška učitavanja", Toast.LENGTH_SHORT).show()
+                })
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val bodystring = response.body()?.string()
+                if(bodystring != null) {
+                    exercises = MainActivity.getExercisesFromJson(bodystring)
+
+                    val db = AppDatabase.getInstance(this@EnterExerciseUrlActivity)
+                    val exerciseDao: ExerciseDao = db.exerciseDao()
+                    for(tmp in exercises!!) {
+                        exerciseDao.insertAll(tmp)
+                    }
+                    startMainActivity()
+                }
+                bodystring?.let {
+                    Log.e("ingo", it)
+                }
+                Log.e("ingo", exercises.toString())
+                Handler(Looper.getMainLooper()).post(Runnable {
+                    Toast.makeText(this@EnterExerciseUrlActivity, "Zadaci učitani", Toast.LENGTH_SHORT).show()
+                })
+            }
+        })
     }
 
 }

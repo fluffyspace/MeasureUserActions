@@ -46,7 +46,7 @@ class ForegroundService: Service(), DialogInterface {
             }
             field = value
         }
-    var switch = false
+    var app: String? = ""
 
     val scope = CoroutineScope(Job() + Dispatchers.IO)
 
@@ -87,16 +87,16 @@ class ForegroundService: Service(), DialogInterface {
     override fun onStartCommand(intent: Intent?, flags2: Int, startId: Int): Int {
         serviceSharedInstance = this
 
-        switch = intent?.extras?.getBoolean("switch") ?: false
+        app = intent?.extras?.getString("app")
         name = intent?.extras?.getString("name")
         val tmp = intent?.extras?.getString("exercise")
         val tmp2 = intent?.extras?.getString("exercises")
         exercises = tmp2?.let { MainActivity.getExercisesFromJson(it) }
         exercise = tmp?.let { MainActivity.getExerciseFromJson(it) }
 
-        //Log.d("ingo", "servis je dobio $exercise")
-        //Log.d("ingo", "servis je dobio $exercises")
-        Log.d("ingo", "servis je dobio za switch $switch")
+        Log.d("ingo", "servis je dobio $exercise")
+        Log.d("ingo", "servis je dobio $exercises")
+        Log.d("ingo", "servis je dobio za aplikaciju $app")
 
 
         intentForPending = packageManager.getLaunchIntentForPackage(this.packageName) ?: Intent(this, ZadatakActivity::class.java).apply {
@@ -212,7 +212,7 @@ class ForegroundService: Service(), DialogInterface {
             scope.launch {
                 // New coroutine that can call suspend functions
                 try {
-                    val akcija = Actions(exercise = exercise!!.id, timeTook = exerciseEnded-exerciseStarted, timestamp = exerciseEnded, standardOrAlternative = switch)
+                    val akcija = Actions(exercise = exercise!!.id, timeTook = exerciseEnded-exerciseStarted, timestamp = exerciseEnded, application = app ?: "ne radi")
                     val akcije = messageDao.insertAll(akcija)
                 } catch (e: Exception) {
                     Log.e("ingo", "greska sendStatistics")

@@ -66,7 +66,7 @@ class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Ad
         val exerciseName = exercise?.name ?: "Zadatak ne postoji"
         Log.d("ingo", "broj zadataka " + exercisesList?.size)
         viewHolder.action_title.text = StringBuilder(exerciseName)
-        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + (if(actionsList[i].standardOrAlternative) "alt." else "std.") + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)")
+        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + actionsList[i].application + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)")
 
     }
 

@@ -7,11 +7,12 @@ import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = arrayOf(Actions::class), version = 1, exportSchema = true)
+@Database(entities = arrayOf(Actions::class, Exercise::class), version = 1, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun actionsDao(): ActionsDao
+    abstract fun exerciseDao(): ExerciseDao
 
     companion object {
 

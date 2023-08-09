@@ -9,6 +9,6 @@ data class Exercise(
     var name:String,
     var approxTime:Long = 0,
     var instructions: String = "",
-    var additionalInfo: String = "",
+    var apps: List<String> = listOf(),
     var repetitions: Int = 0,
 )

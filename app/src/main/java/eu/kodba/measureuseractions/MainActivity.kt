@@ -1,24 +1,20 @@
 package eu.kodba.measureuseractions
 
-import android.app.Notification.Action
+import eu.kodba.measureuseractions.R
 import android.content.Intent
 import android.content.SharedPreferences
-import android.graphics.Canvas
-import android.graphics.drawable.ColorDrawable
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.JsonSyntaxException
@@ -47,56 +43,18 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
     private var actionsAdapter: ActionsAdapter? = null
     var selected_recycler_view_item = -1
 
-    var url: String? = null
-    var name: String? = null
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        getExercises()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
 
         val view = binding.root
         setContentView(view)
 
-        binding.openExercises.isEnabled = false
-        binding.exercisesStatus.text = "Zadaci se učitavaju..."
-
-
-
         checkOverlayPermission();
         Log.d("ingo", "extras ${intent.extras}")
-
-        val urlByIntent = intent.extras?.getString("url")
-        Log.d("ingo", "urlByIntent $urlByIntent")
-        if(urlByIntent != null){
-            changeSettings("url", urlByIntent)
-        }
-        val nameByIntent = intent.extras?.getString("name")
-        Log.d("ingo", "nameByIntent $nameByIntent")
-        if(nameByIntent != null){
-            changeSettings("name", nameByIntent)
-        }
-        if(nameByIntent == null || urlByIntent == null){
-            url = getPreferences(MODE_PRIVATE).getString("url", urlByIntent ?: "")
-            name = getPreferences(MODE_PRIVATE).getString("name", nameByIntent ?: "")
-            Log.d("ingo", "saved = $url, $name")
-            if(url == "" || name == ""){
-                // pokreni EnterExerciseUrlActivity da pitaš korisnika za unos, dodaj url i name kao extras u slučaju da je nešto od toga ispunjeno
-                val intent = Intent(this, EnterExerciseUrlActivity::class.java)
-                intent.putExtra("url", url)
-                intent.putExtra("name", name)
-                if (intent.resolveActivity(packageManager) != null) {
-                    startActivity(intent)
-                }
-                finish()
-                return
-            }
-        } else {
-            url = urlByIntent
-            name = nameByIntent
-        }
-        binding.personsName.text = "Bok, $name."
-        if(url != null) fetchExercises(url!!)
 
         val zadaci_json = intent.extras?.getString("exercises")
         if(zadaci_json != null) {
@@ -140,10 +98,41 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
         binding.recyclerView.adapter = actionsAdapter
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.reload -> {
+                //startActivity(Intent(this, About::class.java))
+                true
+            }
+            R.id.delete_restart -> {
+                //startActivity(Intent(this, Help::class.java))
+                val db = AppDatabase.getInstance(this)
+                val actionsDao: ActionsDao = db.actionsDao()
+                val exerciseDao: ExerciseDao = db.exerciseDao()
+                lifecycleScope.launch(Dispatchers.Default) {
+                    try {
+                        actionsDao.deleteAll()
+                        exerciseDao.deleteAll()
+                        startEnterExerciseUrlActivity()
+                    } catch (e: Exception) {
+                        Log.e("ingo", "greska sendStatistics")
+                    }
+                }
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
     fun startZadaciActivity(){
         val intent = Intent(this, ZadataciActivity::class.java)
         intent.putExtra("exercises", Gson().toJson(exercises))
-        intent.putExtra("name", name)
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)
         }
@@ -216,6 +205,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                             binding.sendStatistics.visibility = View.GONE
                         }
                         actions = akcije.toMutableList()
+                        (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
                         (binding.recyclerView.adapter as ActionsAdapter).actionsList = akcije
                         (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
                     }
@@ -239,6 +229,27 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
         selected_recycler_view_item = actions.indexOf(action)
         val newFragment = DeleteDialog("Želiš li obrisati vježbu?")
         newFragment.show(supportFragmentManager, "deleteAction")
+    }
+
+    fun startEnterExerciseUrlActivity(){
+        val intent = Intent(this@MainActivity, EnterExerciseUrlActivity::class.java)
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(intent)
+        }
+        finish()
+    }
+
+    fun getExercises(){
+        lifecycleScope.launch(Dispatchers.IO) {
+            val db = AppDatabase.getInstance(this@MainActivity)
+            val exerciseDao: ExerciseDao = db.exerciseDao()
+            exercises = exerciseDao.getAll().toMutableList()
+            if(exercises!!.size == 0){
+                withContext(Dispatchers.Main){
+                    startEnterExerciseUrlActivity()
+                }
+            }
+        }
     }
 
     override fun onDialogPositiveClick(dialog: DialogFragment) {
@@ -275,42 +286,6 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
             editor.putLong(key, value as Long)
         }
         editor.apply()
-    }
-
-    fun fetchExercises(url: String){
-        val client = OkHttpClient()
-        val request: Request = Request.Builder()
-            .get()
-            .url(url)
-            .build()
-
-        val test = client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                // Handle this
-                Log.e("ingo","Try again later!!! $e")
-                //binding.getExercises.isEnabled = true
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    binding.exercisesStatus.text = "Greška učitavanja zadataka."
-                })
-            }
-
-            override fun onResponse(call: Call, response: Response) {
-                val bodystring = response.body()?.string()
-                if(bodystring != null) {
-                    exercises = getExercisesFromJson(bodystring)
-                }
-                bodystring?.let {
-                    Log.e("ingo", it)
-                }
-                Log.e("ingo", exercises.toString())
-                Handler(Looper.getMainLooper()).post(Runnable {
-                    (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
-                    (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
-                    binding.openExercises.isEnabled = true
-                    binding.exercisesStatus.text = "Zadaci učitani."
-                })
-            }
-        })
     }
 
 }

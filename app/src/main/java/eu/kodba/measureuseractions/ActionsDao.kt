@@ -21,6 +21,9 @@ interface ActionsDao {
 
     @Delete
     fun delete(polje: Actions)
+
+    @Query("DELETE FROM Actions")
+    fun deleteAll()
 }
 
 @Dao
@@ -42,4 +45,7 @@ interface ExerciseDao {
 
     @Delete
     fun delete(polje: Exercise)
+
+    @Query("DELETE FROM Exercise")
+    fun deleteAll()
 }
