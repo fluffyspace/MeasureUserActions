@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">MeasureUserActions</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="odustani">odustani</string>
+    <string name="trajanje">"Trajanje: "</string>
+    <string name="zadaci">Zadaci</string>
+    <string name="povijest">Povijest</string>
+    <string name="aplikacija_za_mjerenje_alternativnih_rje_enja">Aplikacija za mjerenje alternativnih rješenja</string>
+    <string name="poveznica_do_zadataka">Poveznica do zadataka</string>
+    <string name="dalje">Dalje</string>
+    <string name="aplikacija_s_kojom_e_rje_avati">Aplikacija s kojom ćeš rješavati:</string>
+    <string name="aplikacija">Aplikacija</string>
+    <string name="zapo_ni_zadatak">Započni zadatak</string>
+    <string name="upute">Upute</string>
+    <string name="po_alji_statistiku">Pošalji statistiku</string>
+    <string name="odradene_vjezbe_drzi_za_brisanje">Odrađene vježbe: (drži za brisanje)</string>
+    <string name="izbrisi_sve_i_resetiraj">Izbriši sve i resetiraj</string>
+    <string name="rjesenost_zadatka">"Rješenost zadatka: "</string>
+    <string name="zapocni_zadatak">Započni zadatak</string>
+    <string name="prekini_zadatak">Prekini zadatak</string>
+    <string name="vje_ba_nije_dostupna">Vježba nije dostupna.</string>
+    <string name="zadatak">Zadatak</string>
+    <string name="odaberi_aplikaciju">Odaberi aplikaciju</string>
+    <string name="eli_li_obrisati_vje_bu">Želiš li obrisati vježbu?</string>
+    <string name="jos_nema_rjesenih_vjezbi">Još nema rješenih vježbi.</string>
+    <string name="zadaci_ucitani">Zadaci učitani</string>
+    <string name="greska_ucitavanja">Greška učitavanja</string>
+    <string name="nisu_popunjena_sva_polja">Nisu popunjena sva polja.</string>
+    <string name="vjezba_nije_odabrana">Vježba nije odabrana.</string>
+    <string name="vrijeme_proslo">"Vrijeme prošlo: "</string>
+    <string name="vjezba_nije_pokrenuta">Vježba nije pokrenuta</string>
+    <string name="zadatak_zabiljezen">Zadatak zabilježen.</string>
+</resources>

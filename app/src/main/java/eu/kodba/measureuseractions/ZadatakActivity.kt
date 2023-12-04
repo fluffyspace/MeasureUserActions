@@ -47,12 +47,12 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
                 actions = messageDao.getAll().filter{it.exercise == exercise!!.id }.toMutableList()
                 exercises = exercisesDao.getAll().toMutableList()
 
-                val rjesenosti = "Rješenosti zadatka: " + exercise!!.apps.map{app -> "$app: " + actions.filter { it.application == app }.size + "/${exercise!!.repetitions}"}
+                val rjesenosti = getString(R.string.rjesenost_zadatka) + " " + exercise!!.apps.map{ app -> "$app: " + actions.filter { it.application == app }.size + "/${exercise!!.repetitions}"}
 
                 withContext(Dispatchers.Main){
                     binding.rjesenostZadatka.text = rjesenosti.toString()
                     (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
-                    (binding.recyclerView.adapter as ActionsAdapter).actionsList = actions
+                    (binding.recyclerView.adapter as ActionsAdapter).actionsList = actions.sortedByDescending { it.timestamp }
                     (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
                 }
             } catch (e: Exception) {
@@ -76,7 +76,10 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
     override fun onResume() {
         super.onResume()
         if(ForegroundService.getSharedInstance() != null) {
-            binding.serviceOnoff.text = "Prekini zadatak"
+            binding.serviceOnoff.text = getString(R.string.zapocni_zadatak)
+            ForegroundService.getSharedInstance()?.stopSelf()
+        } else {
+            binding.serviceOnoff.text = getString(R.string.zapocni_zadatak)
         }
         getSolvedExercises()
     }
@@ -88,8 +91,6 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
         val view = binding.root
         setContentView(view)
 
-
-
         name = intent.extras?.getString("name")
         exercise = intent.extras?.getString("exercise")
             ?.let { MainActivity.getExerciseFromJson(it) }
@@ -98,7 +99,7 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
 
         //Log.d("ingo", "dobio sam $exercise i $exercises")
         if(exercise == null){
-            Toast.makeText(this, "Vježba nije dostupna.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, getString(R.string.vje_ba_nije_dostupna), Toast.LENGTH_SHORT).show()
             goToMainActivity()
             finish()
             return
@@ -110,9 +111,9 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
             binding.aplikacijaContainer.visibility = View.GONE
         }
 
-        supportActionBar?.title = "Zadatak ${exercise!!.id}"
+        supportActionBar?.title = getString(R.string.zadatak) + " ${exercise!!.id}: ${exercise!!.name}"
 
-        binding.upute.text = exercise!!.instructions
+        //binding.upute.text = exercise!!.instructions
         binding.zadatak.text = "${exercise!!.name}"
         val encodedHtml = Base64.encodeToString(exercise!!.instructions.toByteArray(), Base64.NO_PADDING)
 
@@ -129,17 +130,18 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
 
             if(ForegroundService.getSharedInstance() == null){
                 if(exercise!!.apps.isNotEmpty() && (binding.appsMenu.text == null || binding.appsMenu.text.toString() == "")){
-                    Toast.makeText(this, "Odaberi aplikaciju", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, getString(R.string.odaberi_aplikaciju), Toast.LENGTH_SHORT).show()
                 } else {
                     startService()
                     binding.serviceOnoff.text = "Prekini zadatak"
+                    this.moveTaskToBack(true);
                 }
             } else {
                 ForegroundService.getSharedInstance()?.stopSelf()
                 binding.serviceOnoff.text = "Započni zadatak"
             }
         }
-        actionsAdapter = ActionsAdapter(this, this)
+        actionsAdapter = ActionsAdapter(this, this, false)
         binding.recyclerView.adapter = actionsAdapter
     }
 
@@ -176,7 +178,7 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, 
 
     override fun onLongClick(action: Actions) {
         selected_recycler_view_item = actions.indexOf(action)
-        val newFragment = DeleteDialog("Želiš li obrisati vježbu?")
+        val newFragment = DeleteDialog(getString(R.string.eli_li_obrisati_vje_bu))
         newFragment.show(supportFragmentManager, "deleteAction")
     }
 

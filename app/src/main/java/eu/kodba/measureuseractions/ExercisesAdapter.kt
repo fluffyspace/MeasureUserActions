@@ -47,7 +47,7 @@ class ExercisesAdapter(c: Context, onExerciseClick: OnExerciseClick) : RecyclerV
         //Here we use the information in the list we created to define the views
         //val appIcon:Drawable? = icons.get(appsList[i].packageName)
         viewHolder.action_title.text = StringBuilder("${exercisesList[i].id}. ${exercisesList[i].name}").toString()
-        viewHolder.action_description.text = StringBuilder("Trajanje: " + exercisesList[i].approxTime.toString() + " min, " + exercisesList[i].apps.map{app -> "$app: " + actionsList.filter { it.application == app && it.exercise == exercisesList[i].id }.size + "/${exercisesList[i].repetitions}"}).toString()
+        viewHolder.action_description.text = StringBuilder(context.getString(R.string.trajanje) + exercisesList[i].approxTime.toString() + " min, " + exercisesList[i].apps.map{ app -> "$app: " + actionsList.filter { it.application == app && it.exercise == exercisesList[i].id }.size + "/${exercisesList[i].repetitions}"}).toString()
 
     }
 
@@ -64,7 +64,7 @@ class ExercisesAdapter(c: Context, onExerciseClick: OnExerciseClick) : RecyclerV
 
         //This is what adds the code we've written in here to our target view
         val inflater = LayoutInflater.from(parent.context)
-        val view: View = inflater.inflate(R.layout.cardview_action_row, parent, false)
+        val view: View = inflater.inflate(R.layout.exercise_row, parent, false)
         return ViewHolder(view)
     }
 

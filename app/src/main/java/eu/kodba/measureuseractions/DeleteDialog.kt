@@ -42,7 +42,7 @@ class DeleteDialog(text: String) : DialogFragment() {
                     DialogInterface.OnClickListener { dialog, id ->
                         listener.onDialogPositiveClick(this)
                     })
-                .setNegativeButton("odustani",
+                .setNegativeButton(getString(R.string.odustani),
                     DialogInterface.OnClickListener { dialog, id ->
                         // User cancelled the dialog
                     })

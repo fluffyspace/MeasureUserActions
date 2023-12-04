@@ -14,14 +14,14 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Aplikacija za mjerenje alternativnih rješenja"
+        android:text="@string/aplikacija_za_mjerenje_alternativnih_rje_enja"
         android:textSize="25sp"
         android:textAlignment="center"
         android:padding="10dp"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Poveznica do zadataka"
+        android:text="@string/poveznica_do_zadataka"
         android:paddingHorizontal="10dp"
         android:layout_marginTop="20dp"/>
     <EditText
@@ -35,7 +35,7 @@
         android:id="@+id/get_exercises"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Dalje"
+        android:text="@string/dalje"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp"/>
 

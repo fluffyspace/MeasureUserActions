@@ -18,6 +18,8 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.RequiresApi
@@ -26,9 +28,9 @@ import com.google.gson.Gson
 import com.torrydo.floatingbubbleview.CloseBubbleBehavior
 import com.torrydo.floatingbubbleview.FloatingBubbleListener
 import com.torrydo.floatingbubbleview.helper.ViewHelper
-import com.torrydo.floatingbubbleview.service.expandable.BubbleBuilder
 import com.torrydo.floatingbubbleview.service.expandable.ExpandableBubbleService
 import com.torrydo.floatingbubbleview.service.expandable.ExpandedBubbleBuilder
+import com.torrydo.floatingbubbleview.service.expandable.BubbleBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -37,20 +39,30 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class ForegroundService: ExpandableBubbleService(), DialogInterface {
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun configBubble(): BubbleBuilder {
         bubbleLayout = LayoutInflater.from(this).inflate(R.layout.activity_bubble, null)
 
         button = bubbleLayout!!.findViewById(R.id.window_close)
+        startActivity = bubbleLayout!!.findViewById(R.id.start_activity)
         vrijeme = bubbleLayout!!.findViewById(R.id.vrijeme)
         error = bubbleLayout!!.findViewById(R.id.error)
 
         error!!.setOnClickListener { view: View ->
             errorClicked()
+            minimize()
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
 
         button!!.findViewById<View>(R.id.window_close).setOnClickListener { view: View ->
             buttonClicked()
+            minimize()
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+        }
+
+        startActivity!!.findViewById<View>(R.id.start_activity).setOnClickListener { view: View ->
+            startApp()
+            minimize()
             view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
         }
 
@@ -65,10 +77,11 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
 
             // set style for the bubble, fade animation by default
             .bubbleStyle(null)
+            .forceDragging(true)
 
             // set start location for the bubble, (x=0, y=0) is the top-left
-            .startLocation(100, 100)    // in dp
-            .startLocationPx(100, 100)  // in px
+            .startLocation(0, 100)
+            //.startLocationPx(100, 100)  // in px
 
             // enable auto animate bubble to the left/right side when release, true by default
             .enableAnimateToEdge(true)
@@ -81,7 +94,7 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
 
             // DYNAMIC_CLOSE_BUBBLE: close-bubble moving based on the bubble's location
             // FIXED_CLOSE_BUBBLE (default): bubble will automatically move to the close-bubble when it reaches the closable-area
-            .closeBehavior(CloseBubbleBehavior.DYNAMIC_CLOSE_BUBBLE)
+            .closeBehavior(CloseBubbleBehavior.FIXED_CLOSE_BUBBLE)
 
             // the more value (dp), the larger closeable-area
             .distanceToClose(100)
@@ -89,8 +102,12 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
             // enable bottom background, false by default
             .bottomBackground(true)
 
+            .distanceToTriggerCloseButtonPx(20)
+
             .addFloatingBubbleListener(object : FloatingBubbleListener {
-                override fun onFingerMove(x: Float, y: Float) {} // The location of the finger on the screen which triggers the movement of the bubble.
+                override fun onFingerMove(x: Float, y: Float) {
+
+                } // The location of the finger on the screen which triggers the movement of the bubble.
                 override fun onFingerUp(x: Float, y: Float) {}   // ..., when finger release from bubble
                 override fun onFingerDown(x: Float, y: Float) {} // ..., when finger tap the bubble
             })
@@ -105,8 +122,8 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
         this.error?.visibility = if (noyes) View.VISIBLE else View.GONE
     }
 
-    fun setButtonText(text: String?) {
-        this.button?.text = text
+    fun toggleButtonImage(play: Boolean) {
+        this.button?.setImageResource(if(play) R.drawable.baseline_play_arrow_24 else R.drawable.baseline_stop_24)
     }
 
     fun setZadatakInfo(text: String?) {
@@ -117,16 +134,15 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
         this.vrijeme?.text = text
     }
 
-    var error: Button? = null
-    var button: Button? = null
+    var error: ImageView? = null
+    var button: ImageView? = null
+    var startActivity: ImageView? = null
     var vrijeme: TextView? = null
 
     //var window: Window? = null
     var bubbleLayout: View? = null
 
     var name: String? = null
-    val textBegin = "Započni"
-    val textStop = "Završi"
     var azurirajNotifikaciju: Job? = null
     val NOTIFICATION_CHANNEL_ID = "example.permanence"
     val FOREGROUND_NOTE_ID = 1
@@ -169,7 +185,7 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
 
         // create an instance of Window class
         // and display the content on screen
-        setButtonText(textBegin)
+        toggleButtonImage(play = true)
 
 
         /*vReceiver = object : BroadcastReceiver() {
@@ -248,6 +264,10 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
         serviceSharedInstance = null
     }
 
+    fun startApp(){
+        startActivity(intentForPending)
+    }
+
     fun buildNotification(): Notification {
         val channelName = "Background Service"
         val manager = (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -261,9 +281,10 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
         }
 
         val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
-        val contentTitle = if(exerciseHappening) "Vrijeme prošlo: " + (System.currentTimeMillis() - exerciseStarted) + " ms" else "Vježba nije pokrenuta"
+        val contentTitle = if(exerciseHappening) getString(R.string.vrijeme_proslo) + (System.currentTimeMillis() - exerciseStarted) + " ms" else getString(
+                    R.string.vjezba_nije_pokrenuta)
         return notificationBuilder.setOngoing(true)
-            .setContentTitle("Vježba ${exercise?.name}")
+            .setContentTitle(getString(R.string.zadatak) + "${exercise?.name}")
             .setContentText(contentTitle) // this is important, otherwise the notification will show the way
             //.addAction(R.drawable.ic_delete, "Otvori zadatak", pendingIntent)
             .setContentIntent(pendingIntent)
@@ -309,7 +330,7 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun buttonClicked() {
         if(exercise == null){
-            obavijesti("Vježba nije odabrana.")
+            obavijesti(getString(R.string.vjezba_nije_odabrana))
             return
         }
         MainActivity.getSharedInstance()?.buttonClicked()
@@ -319,7 +340,7 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
                 start, 1f, 1f, 0, 0, 1f);
 
             exerciseStarted = System.currentTimeMillis()
-            setButtonText(textStop)
+            toggleButtonImage(play = false)
             setZadatakInfo(StringBuilder("${exercise!!.id}. ${exercise!!.name}").toString())
             showingErrorButton(true)
             Log.d("ingo", "Exercise started")
@@ -356,20 +377,21 @@ class ForegroundService: ExpandableBubbleService(), DialogInterface {
         scope.launch {
             // New coroutine that can call suspend functions
             try {
-                val akcija = Actions(exercise = exercise!!.id, timeTook = exerciseEnded-exerciseStarted, timestamp = (exerciseEnded/1000).toLong(), application = app ?: "ne radi", error=error)
+                val akcija = Actions(exercise = exercise!!.id, timeTook = exerciseEnded-exerciseStarted, timestamp = exerciseEnded, application = app ?: "ne radi", error=error)
                 messageDao.insertAll(akcija)
             } catch (e: Exception) {
                 Log.e("ingo", "greska sendStatistics")
             }
         }
         Log.d("ingo", "Exercise ended")
-        setButtonText(textBegin)
+        toggleButtonImage(play = true)
         showingErrorButton(false)
-        obavijesti("Zadatak zabilježen.")
+        obavijesti(getString(R.string.zadatak_zabiljezen))
         //startActivity(intentForPending)
     }
 
     override fun errorClicked() {
+        if(!exerciseHappening) return
         stopExercise(true)
         exerciseHappening = !exerciseHappening
     }

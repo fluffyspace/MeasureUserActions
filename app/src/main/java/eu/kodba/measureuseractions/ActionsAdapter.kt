@@ -15,17 +15,19 @@ interface OnActionClick{
     fun onLongClick(action: Actions)
 }
 
-class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Adapter<ActionsAdapter.ViewHolder>() {
+class ActionsAdapter(c: Context, onActionClick: OnActionClick, showExerciseName: Boolean=true) : RecyclerView.Adapter<ActionsAdapter.ViewHolder>() {
     var actionsList: List<Actions> = listOf()
     var exercisesList: List<Exercise>? = listOf()
     var context:Context
     var onActionClick:OnActionClick
+    var showExerciseName:Boolean = false
     var idOtvorenogMenija:Int = -1
 
 
     init {
         context = c
         this.onActionClick = onActionClick
+        this.showExerciseName = showExerciseName
     }
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView),
@@ -65,7 +67,11 @@ class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Ad
         val exercise = exercisesList?.find{it.id == actionsList[i].exercise}
         val exerciseName = if(exercise != null) StringBuilder("${exercise.id}. ${exercise.name}") else "Zadatak ne postoji"
         Log.d("ingo", "broj zadataka " + exercisesList?.size)
-        viewHolder.action_title.text = exerciseName
+        if(showExerciseName){
+            viewHolder.action_title.text = exerciseName
+        } else {
+            viewHolder.action_title.visibility = View.GONE
+        }
         viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + actionsList[i].application + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)" + if(actionsList[i].error) " error" else "")
 
     }

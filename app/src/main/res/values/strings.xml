@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">MeasureUserActions</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="odustani">cancel</string>
+    <string name="trajanje">"Duration: "</string>
+    <string name="zadaci">Exercises</string>
+    <string name="povijest">History</string>
+    <string name="aplikacija_za_mjerenje_alternativnih_rje_enja">App for measuring time of alternative solutions</string>
+    <string name="poveznica_do_zadataka">Link to exercises</string>
+    <string name="dalje">Next</string>
+    <string name="aplikacija_s_kojom_e_rje_avati">Application to be used:</string>
+    <string name="aplikacija">Application</string>
+    <string name="zapo_ni_zadatak">Start exercise</string>
+    <string name="upute">Instructions</string>
+    <string name="po_alji_statistiku">Send statistics</string>
+    <string name="odradene_vjezbe_drzi_za_brisanje">Done exercises: (hold to delete)</string>
+    <string name="izbrisi_sve_i_resetiraj">Delete everything and restart</string>
+    <string name="rjesenost_zadatka">Solved: </string>
+    <string name="prekini_zadatak">Stop exercise</string>
+    <string name="zapocni_zadatak">Start exercise</string>
+    <string name="vje_ba_nije_dostupna">Exercise not available.</string>
+    <string name="zadatak">Exercise</string>
+    <string name="odaberi_aplikaciju">Choose application</string>
+    <string name="eli_li_obrisati_vje_bu">Are you sure?</string>
+    <string name="jos_nema_rjesenih_vjezbi">No completed exercises yet.</string>
+    <string name="zadaci_ucitani">Exercises loaded</string>
+    <string name="greska_ucitavanja">Error loading exercises</string>
+    <string name="nisu_popunjena_sva_polja">Input field empty</string>
+    <string name="vjezba_nije_odabrana">Exercise not selected</string>
+    <string name="vrijeme_proslo">Time elapsed: </string>
+    <string name="vjezba_nije_pokrenuta">Exercise not started</string>
+    <string name="zadatak_zabiljezen">Exercise recorded</string>
 </resources>

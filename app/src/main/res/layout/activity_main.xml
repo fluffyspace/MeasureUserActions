@@ -7,15 +7,29 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity"
-    android:orientation="vertical"
-    android:padding="20dp">
+    android:orientation="vertical">
+
+
+    <androidx.fragment.app.FragmentContainerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/fragment_container_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"/>
+
+
+    <!--
     <Button
         android:id="@+id/open_exercises"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Otvori zadatke"
         app:layout_constraintTop_toTopOf="parent"
-        android:padding="20dp"/>
+        android:padding="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"/>
     <View
         android:id="@+id/hr"
         app:layout_constraintTop_toBottomOf="@id/open_exercises"
@@ -23,27 +37,13 @@
         android:layout_height="2dp"
         android:background="@color/text"
         android:layout_marginTop="20dp"/>
-    <Button
-        android:id="@+id/send_statistics"
+
+
+    -->
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Pošalji statistiku"
-        app:layout_constraintTop_toBottomOf="@id/hr"
-        android:padding="20dp"
-        android:layout_marginTop="20dp"/>
-    <TextView
-        android:id="@+id/odradeneVjezbeHint"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Odrađene vježbe: (drži za brisanje)"
-        android:padding="10dp"
-        app:layout_constraintTop_toBottomOf="@id/send_statistics"/>
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layoutManager=
-            "androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/odradeneVjezbeHint"
+        app:menu="@menu/bottom_navigation_menu"
         app:layout_constraintBottom_toBottomOf="parent"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

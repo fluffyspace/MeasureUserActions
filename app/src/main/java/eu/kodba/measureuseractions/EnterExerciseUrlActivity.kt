@@ -51,7 +51,7 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
                 fetchExercises(binding.exercisesLink.text.toString())
             } else {
                 Log.d("ingo", "not fetching " + binding.exercisesLink.text.toString())
-                Toast.makeText(this, "Nisu popunjena sva polja.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, getString(R.string.nisu_popunjena_sva_polja), Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -90,7 +90,7 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
                 Log.e("ingo","Try again later!!! $e")
                 //binding.getExercises.isEnabled = true
                 Handler(Looper.getMainLooper()).post(Runnable {
-                    Toast.makeText(this@EnterExerciseUrlActivity, "Greška učitavanja", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@EnterExerciseUrlActivity, getString(R.string.greska_ucitavanja), Toast.LENGTH_SHORT).show()
                 })
             }
 
@@ -111,7 +111,7 @@ class EnterExerciseUrlActivity : AppCompatActivity() {
                 }
                 Log.e("ingo", exercises.toString())
                 Handler(Looper.getMainLooper()).post(Runnable {
-                    Toast.makeText(this@EnterExerciseUrlActivity, "Zadaci učitani", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@EnterExerciseUrlActivity, getString(R.string.zadaci_ucitani), Toast.LENGTH_SHORT).show()
                 })
             }
         })

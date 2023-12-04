@@ -18,7 +18,8 @@
         android:text="Zadatak: "
         android:layout_marginTop="10dp"
         android:textSize="20sp"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/rjesenost_zadatka"
@@ -35,13 +36,13 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Aplikacija s kojom ćeš rješavati:"
+            android:text="@string/aplikacija_s_kojom_e_rje_avati"
             android:layout_marginTop="20dp"/>
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Aplikacija"
+            android:hint="@string/aplikacija"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="20dp">
             <AutoCompleteTextView
@@ -56,13 +57,13 @@
         android:id="@+id/service_onoff"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Započni zadatak"
+        android:text="@string/zapo_ni_zadatak"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp"/>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Upute"
+        android:text="@string/upute"
         android:layout_marginTop="10dp"
         android:textSize="20sp"/>
     <WebView
@@ -70,18 +71,11 @@
         android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/upute"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upute"
-        android:padding="10dp"
-        android:textSize="20sp"
-        android:visibility="gone"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:nestedScrollingEnabled="false"
         app:layoutManager=
             "androidx.recyclerview.widget.GridLayoutManager"/>
 </LinearLayout>

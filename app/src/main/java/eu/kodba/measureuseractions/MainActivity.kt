@@ -11,7 +11,11 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.add
+import androidx.fragment.app.commit
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.navigation.NavigationBarView
 import com.google.gson.Gson
 import com.google.gson.JsonParseException
 import com.google.gson.JsonSyntaxException
@@ -31,8 +35,8 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
     var exercise: Exercise? = null
     var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
-    private var actionsAdapter: ActionsAdapter? = null
-    var selected_recycler_view_item = -1
+    lateinit var zadaciFragment: ZadataciFragment
+    lateinit var historyFragment: HistoryFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,31 +66,76 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
             }
         }
 
-        binding.openExercises.setOnClickListener {
+        /*binding.openExercises.setOnClickListener {
             startZadaciActivity()
         }
 
-        binding.sendStatistics.setOnClickListener {
-            val db = AppDatabase.getInstance(this)
-            val messageDao: ActionsDao = db.actionsDao()
-            lifecycleScope.launch(Dispatchers.Default) {
-                try {
-                    val akcije = messageDao.getAll()
-                    val sendIntent: Intent = Intent().apply {
-                        action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, Gson().toJson(akcije))
-                        type = "text/plain"
-                    }
-                    val shareIntent = Intent.createChooser(sendIntent, null)
-                    startActivity(shareIntent)
-                } catch (e: Exception) {
-                    Log.e("ingo", "greska sendStatistics")
+        */
+
+        zadaciFragment = ZadataciFragment()
+        historyFragment = HistoryFragment()
+
+
+
+        binding.bottomNavigation.setOnItemSelectedListener { item ->
+            Log.d("ingo", "clicked")
+            when(item.itemId) {
+                R.id.item_1 -> {
+                    switchFragment(zadaciFragment)
+                    Log.d("ingo", "zadaci fragment")
+                    true
                 }
+                R.id.item_2 -> {
+                    val servis = ForegroundService.getSharedInstance()
+                    if(servis == null){
+                        val db = AppDatabase.getInstance(this)
+                        val messageDao: ActionsDao = db.actionsDao()
+                        lifecycleScope.launch(Dispatchers.Default) {
+                            try {
+                                var akcije = messageDao.getAll()
+                                akcije = akcije.sortedByDescending { it.id }
+                                Log.d("ingo", "akcije $akcije")
+                                withContext(Dispatchers.Main){
+                                    exercises?.let { historyFragment.historyUpdated(akcije, it) }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("ingo", "greska sendStatistics")
+                            }
+                        }
+                    }
+                    switchFragment(historyFragment)
+                    Log.d("ingo", "history fragment")
+                    true
+                }
+                else -> false
             }
         }
+        switchFragment(zadaciFragment)
+    }
 
-        actionsAdapter = ActionsAdapter(this, this)
-        binding.recyclerView.adapter = actionsAdapter
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        // izbriši item at ...
+        val action = actions[historyFragment.selected_recycler_view_item]
+        actions.removeAt(historyFragment.selected_recycler_view_item)
+        historyFragment.actionsAdapter.actionsList = actions
+        historyFragment.actionsAdapter.exercisesList = exercises
+        historyFragment.actionsAdapter.notifyItemRemoved(historyFragment.selected_recycler_view_item)
+        val db = AppDatabase.getInstance(this)
+        val messageDao: ActionsDao = db.actionsDao()
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                messageDao.delete(action)
+            } catch (e: Exception) {
+                Log.e("ingo", "greska onDialogPositiveClick $e")
+            }
+        }
+    }
+
+    fun switchFragment(fragment: Fragment){
+        supportFragmentManager.commit {
+            replace(R.id.fragment_container_view, fragment, "actions")
+            setReorderingAllowed(true)
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -113,14 +162,6 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                 true
             }
             else -> super.onOptionsItemSelected(item)
-        }
-    }
-
-    fun startZadaciActivity(){
-        val intent = Intent(this, ZadataciActivity::class.java)
-        intent.putExtra("exercises", Gson().toJson(exercises))
-        if (intent.resolveActivity(packageManager) != null) {
-            startActivity(intent)
         }
     }
 
@@ -177,7 +218,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
             startZadatakActivity()*/
             startActivity(servis.intentForPending)
             finish()
-        } else {
+        }/* else {
             val db = AppDatabase.getInstance(this)
             val messageDao: ActionsDao = db.actionsDao()
             lifecycleScope.launch(Dispatchers.Default) {
@@ -186,23 +227,13 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                     akcije = akcije.sortedByDescending { it.id }
                     Log.d("ingo", "akcije $akcije")
                     withContext(Dispatchers.Main){
-                        if(akcije.isEmpty()){
-                            binding.odradeneVjezbeHint.text = "Još nema rješenih vježbi."
-                            binding.sendStatistics.visibility = View.GONE
-                        } else {
-                            binding.odradeneVjezbeHint.text = "Odrađene vježbe: (drži za brisanje)"
-                            binding.sendStatistics.visibility = View.VISIBLE
-                        }
-                        actions = akcije.toMutableList()
-                        (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
-                        (binding.recyclerView.adapter as ActionsAdapter).actionsList = akcije
-                        (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
+                        exercises?.let { historyFragment.historyUpdated(akcije, it) }
                     }
                 } catch (e: Exception) {
                     Log.e("ingo", "greska sendStatistics")
                 }
             }
-        }
+        }*/
     }
 
     override fun onPause() {
@@ -219,9 +250,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
     }
 
     override fun onLongClick(action: Actions) {
-        selected_recycler_view_item = actions.indexOf(action)
-        val newFragment = DeleteDialog("Želiš li obrisati vježbu?")
-        newFragment.show(supportFragmentManager, "deleteAction")
+
     }
 
     fun startEnterExerciseUrlActivity(){
@@ -241,24 +270,6 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                 withContext(Dispatchers.Main){
                     startEnterExerciseUrlActivity()
                 }
-            }
-        }
-    }
-
-    override fun onDialogPositiveClick(dialog: DialogFragment) {
-        // izbriši item at ...
-        val action = actions[selected_recycler_view_item]
-        actions.removeAt(selected_recycler_view_item)
-        (binding.recyclerView.adapter as ActionsAdapter).actionsList = actions
-        (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
-        (binding.recyclerView.adapter as ActionsAdapter).notifyItemRemoved(selected_recycler_view_item)
-        val db = AppDatabase.getInstance(this)
-        val messageDao: ActionsDao = db.actionsDao()
-        lifecycleScope.launch(Dispatchers.Default) {
-            try {
-                messageDao.delete(action)
-            } catch (e: Exception) {
-                Log.e("ingo", "greska onDialogPositiveClick $e")
             }
         }
     }

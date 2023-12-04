@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.google.android.material:material:1.9.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation("androidx.room:room-runtime:2.5.2")
+    implementation 'androidx.compose.ui:ui-android:+'
     annotationProcessor "androidx.room:room-compiler:2.5.2"
     // To use Kotlin annotation processing tool (kapt)
     kapt("androidx.room:room-compiler:2.5.2")
@@ -62,5 +63,13 @@ dependencies {
     implementation 'com.squareup.retrofit2:converter-moshi:2.9.0'
     implementation "androidx.recyclerview:recyclerview:1.3.1"
 
-    implementation("io.github.torrydo:floating-bubble-view:0.6.3")
+    //implementation("io.github.torrydo:floating-bubble-view:0.6.3")
+    //implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //implementation files("C:\\Users\\mini\\Documents\\Floating-Bubble-View")
+
+    implementation 'com.google.android.material:material:1.10.0'
+    implementation project(":FloatingBubbleView")
+
+    implementation "androidx.fragment:fragment-ktx:1.6.2"
+
 }
