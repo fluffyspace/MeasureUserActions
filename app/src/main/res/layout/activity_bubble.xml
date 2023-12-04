@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:context=".BubbleActivity"
+    android:orientation="horizontal">
+
+    <Button
+        android:id="@+id/window_close"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="CLICK"
+        android:padding="20dp"
+        android:textAllCaps="false"/>
+    <Button
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Error"
+        android:padding="20dp"
+        android:textAllCaps="false"
+        android:visibility="gone"/>
+    <TextView
+        android:id="@+id/vrijeme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text=""
+        tools:text="6 s"
+        android:clickable="false"
+        android:textColor="@color/white"
+        android:shadowColor="@color/black"
+        android:shadowRadius="6"/>
+</LinearLayout>

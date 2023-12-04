@@ -2,12 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
     <!-- add required permission -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+
 
     <application
         android:allowBackup="true"
@@ -18,28 +19,43 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MeasureUserActions"
         tools:targetApi="31">
-
+        <activity
+            android:name=".BubbleActivity"
+            android:exported="false"
+            android:resizeableActivity="true"
+            android:allowEmbedded="true"/>
         <!-- register the service -->
         <service
             android:name=".ForegroundService"
             android:enabled="true"
             android:exported="true"
-            android:foregroundServiceType="specialUse"/>
+            android:foregroundServiceType="specialUse" />
+
+        <service
+            android:name=".MyBubbleService"
+            android:foregroundServiceType="specialUse"
+            >
+            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="foo"/>  <!-- optional -->
+        </service>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="MeasureUserActions">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="eu.kodba.measureuseractions.EnterExerciseUrlActivity"
+            android:name=".EnterExerciseUrlActivity"
             android:exported="true"
-            android:noHistory="true"
-            android:label="Unos podataka">
-            <intent-filter android:label="Enter exercise url and persons name" android:autoVerify="true">
+            android:label="Unos podataka"
+            android:noHistory="true">
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Enter exercise url and persons name">
                 <action android:name="android.intent.action.VIEW" />
 
                 <!-- on below line we are adding a default category to our intent -->
@@ -48,23 +64,19 @@
                 <!-- on below line we are adding a category to make our app browsable -->
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="www.kodba.eu"/>
+                <data android:host="www.kodba.eu" />
                 <data android:scheme="https" />
                 <data android:scheme="http" />
-
-
             </intent-filter>
         </activity>
         <activity
-            android:label="Popis zadataka"
             android:name=".ZadataciActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"
+            android:label="Popis zadataka"></activity>
         <activity
-            android:label="Zadatak"
             android:name=".ZadatakActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"
+            android:label="Zadatak"></activity>
     </application>
 
 </manifest>

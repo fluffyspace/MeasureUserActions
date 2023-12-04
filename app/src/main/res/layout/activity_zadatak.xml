@@ -19,25 +19,7 @@
         android:layout_marginTop="10dp"
         android:textSize="20sp"
         android:textStyle="bold"/>
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upute"
-        android:layout_marginTop="10dp"
-        android:textSize="20sp"/>
-    <WebView
-        android:id="@+id/webview"
-        android:layout_marginTop="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:id="@+id/upute"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Upute"
-        android:padding="10dp"
-        android:textSize="20sp"
-        android:visibility="gone"/>
+
     <TextView
         android:id="@+id/rjesenost_zadatka"
         android:layout_width="match_parent"
@@ -77,5 +59,30 @@
         android:text="Započni zadatak"
         app:layout_constraintTop_toTopOf="parent"
         android:padding="20dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upute"
+        android:layout_marginTop="10dp"
+        android:textSize="20sp"/>
+    <WebView
+        android:id="@+id/webview"
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:id="@+id/upute"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upute"
+        android:padding="10dp"
+        android:textSize="20sp"
+        android:visibility="gone"/>
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layoutManager=
+            "androidx.recyclerview.widget.GridLayoutManager"/>
 </LinearLayout>
 </ScrollView>

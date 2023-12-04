@@ -1,11 +1,8 @@
 package eu.kodba.measureuseractions
 
-import eu.kodba.measureuseractions.R
 import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.view.Menu
@@ -23,12 +20,6 @@ import eu.kodba.measureuseractions.databinding.ActivityMainBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import java.io.IOException
 import java.lang.reflect.Type
 
 
@@ -83,7 +74,7 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                     val akcije = messageDao.getAll()
                     val sendIntent: Intent = Intent().apply {
                         action = Intent.ACTION_SEND
-                        putExtra(Intent.EXTRA_TEXT, akcije.toString())
+                        putExtra(Intent.EXTRA_TEXT, Gson().toJson(akcije))
                         type = "text/plain"
                     }
                     val shareIntent = Intent.createChooser(sendIntent, null)
@@ -198,6 +189,9 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
                         if(akcije.isEmpty()){
                             binding.odradeneVjezbeHint.text = "Još nema rješenih vježbi."
                             binding.sendStatistics.visibility = View.GONE
+                        } else {
+                            binding.odradeneVjezbeHint.text = "Odrađene vježbe: (drži za brisanje)"
+                            binding.sendStatistics.visibility = View.VISIBLE
                         }
                         actions = akcije.toMutableList()
                         (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
@@ -218,6 +212,10 @@ class MainActivity : AppCompatActivity(), DialogInterface, OnActionClick,
 
     override fun buttonClicked() {
         Log.d("ingo", "button clicked")
+    }
+
+    override fun errorClicked() {
+        Log.d("ingo", "errorClicked")
     }
 
     override fun onLongClick(action: Actions) {

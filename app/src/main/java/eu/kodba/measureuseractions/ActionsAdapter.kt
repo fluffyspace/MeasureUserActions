@@ -63,10 +63,10 @@ class ActionsAdapter(c: Context, onActionClick: OnActionClick) : RecyclerView.Ad
         //Here we use the information in the list we created to define the views
         //val appIcon:Drawable? = icons.get(appsList[i].packageName)
         val exercise = exercisesList?.find{it.id == actionsList[i].exercise}
-        val exerciseName = exercise?.name ?: "Zadatak ne postoji"
+        val exerciseName = if(exercise != null) StringBuilder("${exercise.id}. ${exercise.name}") else "Zadatak ne postoji"
         Log.d("ingo", "broj zadataka " + exercisesList?.size)
-        viewHolder.action_title.text = StringBuilder(exerciseName)
-        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + actionsList[i].application + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)")
+        viewHolder.action_title.text = exerciseName
+        viewHolder.action_description.text = StringBuilder(getDateString(actionsList[i].timestamp) + " (" + actionsList[i].application + ", ~" + (actionsList[i].timeTook/1000).toString() + " s)" + if(actionsList[i].error) " error" else "")
 
     }
 

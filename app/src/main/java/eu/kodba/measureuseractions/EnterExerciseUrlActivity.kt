@@ -1,29 +1,20 @@
 package eu.kodba.measureuseractions
 
 import android.content.Intent
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.google.gson.Gson
-import com.google.gson.JsonParseException
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
 import eu.kodba.measureuseractions.databinding.ActivityEnterExerciseUrlBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import java.io.IOException
-import java.lang.reflect.Type
 
 
 class EnterExerciseUrlActivity : AppCompatActivity() {

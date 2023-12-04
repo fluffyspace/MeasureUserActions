@@ -49,20 +49,32 @@ class ZadataciActivity : AppCompatActivity(), OnExerciseClick {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         binding = ActivityZadaciBinding.inflate(layoutInflater)
-
         val view = binding.root
         setContentView(view)
 
-        name = intent.extras?.getString("name").toString()
-        val zadaci_json = intent.extras?.getString("exercises")
-        if(zadaci_json != null) {
-            exercises = MainActivity.getExercisesFromJson(zadaci_json)
-            if(exercises != null){
-                exercisesAdapter = ExercisesAdapter(this, this)
-                exercisesAdapter?.exercisesList = exercises as MutableList<Exercise>
-                binding.recyclerView.adapter = exercisesAdapter
+        getExercisesAndActions()
+    }
+
+    fun getExercisesAndActions(){
+        val db = AppDatabase.getInstance(this)
+        val actionsDao: ActionsDao = db.actionsDao()
+        val exerciseDao: ExerciseDao = db.exerciseDao()
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                actions = actionsDao.getAll().toMutableList()
+                exercises = exerciseDao.getAll().toMutableList()
+
+                withContext(Dispatchers.Main){
+                    if(exercises != null){
+                        exercisesAdapter = ExercisesAdapter(this@ZadataciActivity, this@ZadataciActivity)
+                        exercisesAdapter?.exercisesList = exercises as MutableList<Exercise>
+                        exercisesAdapter?.actionsList = actions as MutableList<Actions>
+                        binding.recyclerView.adapter = exercisesAdapter
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ingo", "greska getSolvedExercises ${e.toString()}")
             }
         }
     }

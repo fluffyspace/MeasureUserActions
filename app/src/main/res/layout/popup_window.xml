@@ -1,28 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:padding="4dp"
     android:background="@null"
     android:orientation="vertical">
-
     <Button
         android:id="@+id/window_close"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="CLICK" />
+        android:text="CLICK"
+        android:padding="20dp"
+        android:textAllCaps="false"
+        android:layout_toRightOf="@id/error"/>
+    <Button
+        android:id="@+id/error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Error"
+        android:padding="20dp"
+        android:textAllCaps="false"
+        android:visibility="gone"/>
     <TextView
         android:id="@+id/vrijeme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text=""
+        tools:text="6 s"
+        android:layout_alignRight="@id/window_close"
         android:layout_below="@id/window_close"
         android:clickable="false"
         android:textColor="@color/white"
         android:shadowColor="@color/black"
-        android:shadowRadius="2"
-        android:layout_alignRight="@id/window_close"/>
+        android:shadowRadius="6"/>
 
 </RelativeLayout>

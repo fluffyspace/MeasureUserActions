@@ -14,6 +14,7 @@ interface OnExerciseClick{
 
 class ExercisesAdapter(c: Context, onExerciseClick: OnExerciseClick) : RecyclerView.Adapter<ExercisesAdapter.ViewHolder>() {
     var exercisesList: List<Exercise> = listOf()
+    var actionsList: List<Actions> = listOf()
     var context:Context
     var onExerciseClick:OnExerciseClick
 
@@ -45,8 +46,8 @@ class ExercisesAdapter(c: Context, onExerciseClick: OnExerciseClick) : RecyclerV
     override fun onBindViewHolder(viewHolder: ViewHolder, i: Int) {
         //Here we use the information in the list we created to define the views
         //val appIcon:Drawable? = icons.get(appsList[i].packageName)
-        viewHolder.action_title.text = exercisesList[i].name
-        viewHolder.action_description.text = "Očekivano trajanje: " + exercisesList[i].approxTime.toString() + " min"
+        viewHolder.action_title.text = StringBuilder("${exercisesList[i].id}. ${exercisesList[i].name}").toString()
+        viewHolder.action_description.text = StringBuilder("Trajanje: " + exercisesList[i].approxTime.toString() + " min, " + exercisesList[i].apps.map{app -> "$app: " + actionsList.filter { it.application == app && it.exercise == exercisesList[i].id }.size + "/${exercisesList[i].repetitions}"}).toString()
 
     }
 

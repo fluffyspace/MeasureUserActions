@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
@@ -18,7 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
+class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener, OnActionClick {
 
     private lateinit var binding: ActivityZadatakBinding
 
@@ -27,6 +28,8 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
     var exercises: MutableList<Exercise>? = mutableListOf()
     var actions: MutableList<Actions> = mutableListOf()
 
+    private var actionsAdapter: ActionsAdapter? = null
+    var selected_recycler_view_item = -1
     override fun onBackPressed() {
         if(ForegroundService.getSharedInstance() == null){
             super.onBackPressed()
@@ -38,13 +41,19 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
     fun getSolvedExercises(){
         val db = AppDatabase.getInstance(this)
         val messageDao: ActionsDao = db.actionsDao()
+        val exercisesDao: ExerciseDao = db.exerciseDao()
         lifecycleScope.launch(Dispatchers.Default) {
             try {
-                val akcije = messageDao.getAll().filter{it.exercise == exercise!!.id }
-                val rjesenosti = "Rješenosti zadatka: " + exercise!!.apps.map{app -> "$app: " + akcije.filter { it.application == app }.size + "/${exercise!!.repetitions}"}
+                actions = messageDao.getAll().filter{it.exercise == exercise!!.id }.toMutableList()
+                exercises = exercisesDao.getAll().toMutableList()
+
+                val rjesenosti = "Rješenosti zadatka: " + exercise!!.apps.map{app -> "$app: " + actions.filter { it.application == app }.size + "/${exercise!!.repetitions}"}
 
                 withContext(Dispatchers.Main){
                     binding.rjesenostZadatka.text = rjesenosti.toString()
+                    (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
+                    (binding.recyclerView.adapter as ActionsAdapter).actionsList = actions
+                    (binding.recyclerView.adapter as ActionsAdapter).notifyDataSetChanged()
                 }
             } catch (e: Exception) {
                 Log.e("ingo", "greska getSolvedExercises ${e.toString()}")
@@ -58,11 +67,11 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
             startActivity(intent)
         }
     }
-
+/*
     override fun onDialogPositiveClick(dialog: DialogFragment) {
         ForegroundService.getSharedInstance()?.stopSelf()
         finish()
-    }
+    }*/
 
     override fun onResume() {
         super.onResume()
@@ -114,6 +123,10 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
         binding.appsMenu.setAdapter(adapter)
 
         binding.serviceOnoff.setOnClickListener {
+            /*val intent = Intent(this, MyBubbleService::class.java)
+
+            ContextCompat.startForegroundService(this, intent)*/
+
             if(ForegroundService.getSharedInstance() == null){
                 if(exercise!!.apps.isNotEmpty() && (binding.appsMenu.text == null || binding.appsMenu.text.toString() == "")){
                     Toast.makeText(this, "Odaberi aplikaciju", Toast.LENGTH_SHORT).show()
@@ -126,7 +139,8 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
                 binding.serviceOnoff.text = "Započni zadatak"
             }
         }
-
+        actionsAdapter = ActionsAdapter(this, this)
+        binding.recyclerView.adapter = actionsAdapter
     }
 
     companion object{
@@ -156,6 +170,30 @@ class ZadatakActivity : AppCompatActivity(), DeleteDialog.NoticeDialogListener {
                     .putExtra("exercise", Gson().toJson(exercise))
                     .putExtra("exercises", Gson().toJson(exercises))
                 )
+            }
+        }
+    }
+
+    override fun onLongClick(action: Actions) {
+        selected_recycler_view_item = actions.indexOf(action)
+        val newFragment = DeleteDialog("Želiš li obrisati vježbu?")
+        newFragment.show(supportFragmentManager, "deleteAction")
+    }
+
+    override fun onDialogPositiveClick(dialog: DialogFragment) {
+        // izbriši item at ...
+        val action = actions[selected_recycler_view_item]
+        actions.removeAt(selected_recycler_view_item)
+        (binding.recyclerView.adapter as ActionsAdapter).actionsList = actions
+        (binding.recyclerView.adapter as ActionsAdapter).exercisesList = exercises
+        (binding.recyclerView.adapter as ActionsAdapter).notifyItemRemoved(selected_recycler_view_item)
+        val db = AppDatabase.getInstance(this)
+        val messageDao: ActionsDao = db.actionsDao()
+        lifecycleScope.launch(Dispatchers.Default) {
+            try {
+                messageDao.delete(action)
+            } catch (e: Exception) {
+                Log.e("ingo", "greska onDialogPositiveClick $e")
             }
         }
     }

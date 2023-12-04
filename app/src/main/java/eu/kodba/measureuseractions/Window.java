@@ -17,6 +17,7 @@ import static android.content.Context.WINDOW_SERVICE;
 
 interface DialogInterface{
     void buttonClicked();
+    void errorClicked();
 }
 
 public class Window {
@@ -29,7 +30,9 @@ public class Window {
     private LayoutInflater layoutInflater;
 
     private Button button;
+    private Button error;
     private TextView vrijeme;
+    //private TextView zadatakinfo;
 
     public Window(Context context, DialogInterface dialogInterface){
         this.context=context;
@@ -55,23 +58,31 @@ public class Window {
         // set onClickListener on the remove button, which removes
         // the view from the window
         button = mView.findViewById(R.id.window_close);
+        //zadatakinfo = mView.findViewById(R.id.vjezba);
+        error = mView.findViewById(R.id.error);
+        error.setOnClickListener(view -> {
+            dialogInterface.errorClicked();
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        });
+
         vrijeme = mView.findViewById(R.id.vrijeme);
-        button.findViewById(R.id.window_close).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dialogInterface.buttonClicked();
-                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                //close();
-            }
+        button.findViewById(R.id.window_close).setOnClickListener(view -> {
+            dialogInterface.buttonClicked();
+            view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         });
         // Define the position of the
         // window within the screen
         mParams.gravity = Gravity.END|Gravity.TOP;
         mWindowManager = (WindowManager)context.getSystemService(WINDOW_SERVICE);
     }
-
+    public void showingErrorButton(Boolean noyes) {
+        this.error.setVisibility(noyes ? View.VISIBLE : View.GONE);
+    }
     public void setButtonText(String text) {
         this.button.setText(text);
+    }
+    public void setZadatakInfo(String text) {
+        //zadatakinfo.setText(text);
     }
     public void setVrijemeText(String text) {
         this.vrijeme.setText(text);
